@@ -102,20 +102,18 @@ pipeline {
             }
             post {
                 always {
-                    // Publish HTML report
-                    
+                    // 1) Publish HTML report (compatible with older plugin versions)
                     publishHTML([
-                        reportDir: 'reports-e2e/html/',
+                        reportDir: 'reports-e2e/html',
                         reportFiles: 'index.html',
                         reportName: 'Playwright HTML Report',
-                        reportTitle:'',
-                        useWrapperFileDirectory:true
-                        keepAll: false,
+                        keepAll: true,
                         alwaysLinkToLastBuild: true,
-                        icon:'',
-                        allowMissing: false
+                        allowMissing: true
                     ])
-                     junit stdioRentention:'ALL',
+                    // 2) Publish JUnit (works as-is)
+                     junit 'reports-e2e/junit.xml'
+                    // 3) Archive the full report so you can download & open it locally
                      testResults:'reports-e2e/junit.xml'
 
             
