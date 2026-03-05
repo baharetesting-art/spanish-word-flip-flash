@@ -109,8 +109,9 @@ pipeline {
                         reportName: 'Playwright HTML Report',
                         keepAll: true,
                         alwaysLinkToLastBuild: true,
-                        allowMissing: true
-                    ])
+                        allowMissing: true,
+                        sandbox: false          // ✔️ IMPORTANT
+                        ])
 
                     // Publish JUnit results
                     junit 'reports-e2e/junit.xml'
