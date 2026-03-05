@@ -3,9 +3,11 @@ pipeline {
     
     options {
         ansiColor('xterm')
+        timeout(time: 30, unit: 'MINUTES')
     }
 
     stages {
+
         stage('build') {
             agent {
                 docker {
@@ -20,6 +22,10 @@ pipeline {
 
         stage('test') {
             parallel {
+
+                // -------------------------
+                // UNIT TESTS (Vitest)
+                // -------------------------
                 stage('unit tests') {
                     agent {
                         docker {
@@ -28,25 +34,40 @@ pipeline {
                         }
                     }
                     steps {
-                        // Unit tests with Vitest
-                        sh 'npx vitest run --reporter=verbose'
+                        sh 'npm ci'
+                        sh 'npx vitest run --reporter=junit --outputFile=test-results.xml'
+                    }
+                    post {
+                        always {
+                            junit 'test-results.xml'
+                        }
                     }
                 }
-                stage('integration test'){
-                    agent{
-                        docker{
+
+                // -------------------------
+                // PLAYWRIGHT INTEGRATION TESTS
+                // (For your local/DEV environment)
+                // -------------------------
+                stage('integration test') {
+                    agent {
+                        docker {
                             image 'mcr.microsoft.com/playwright:v1.54.2-jammy'
                             reuseNode true
-
                         }
-                   } 
-                   steps{
-                       sh 'npx playwright test'
-                   }
+                    }
+                    steps {
+                        sh '''
+                          npm ci
+                          npx playwright test
+                        '''
+                    }
                 }
             }
         }
 
+        // -------------------------
+        // MOCK DEPLOY
+        // -------------------------
         stage('deploy') {
             agent {
                 docker {
@@ -54,27 +75,48 @@ pipeline {
                 }
             }
             steps {
-                // Mock deployment which does nothing
                 echo 'Mock deployment was successful!'
             }
         }
-        stage('e2e'){
-            agent{
-                docker{
-                   image 'mcr.microsoft.com/playwright:v1.54.2-jammy' 
-                   reuseNode true
+
+        // -------------------------
+        // FULL END-TO-END TESTING (AGAINST PRODUCED WEBSITE)
+        // -------------------------
+        stage('e2e') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.54.2-jammy'
+                    reuseNode true
                 }
             }
-            environment{
-                E2E_BASE_URL ='https://valentinos-magic-beans.click/'
+            environment {
+                E2E_BASE_URL = 'https://valentinos-magic-beans.click/'
             }
-            steps{
-                sh 'npx playwright test'
+            steps {
+                sh '''
+                  node -v
+                  npm -v
+                  npm ci
+                  npx playwright test
+                '''
             }
-            post{
-                always{
-                    publishHTML([allowMissing:false,alwaysLinkToLastBuild:true,icon:'',KeepAll:false,reportDir:'reports-e2e/html',reportFile:'index.html',reportName:'Playwright HTML Report',reportTitles:'',useWrapperFileDirectory:true])
-                    junit stdioRentention:'All', testResults:'reports-e2e/junit.xml'
+            post {
+                always {
+                    // Publish HTML report
+                    publishHTML([
+                        reportDir: 'reports-e2e/html',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright HTML Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true
+                    ])
+
+                    // Publish JUnit results
+                    junit 'reports-e2e/junit.xml'
+
+                    // Archive artifacts for download
+                    archiveArtifacts artifacts: 'reports-e2e/**', fingerprint: true
                 }
             }
         }
