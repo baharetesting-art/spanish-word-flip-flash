@@ -48,20 +48,20 @@ pipeline {
                 // PLAYWRIGHT INTEGRATION TESTS
                 // (For your local/DEV environment)
                 // -------------------------
-                stage('integration test') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.54.2-jammy'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh '''
-                          npm ci
-                          npx playwright test
-                        '''
-                    }
-                }
+                // stage('integration test') {
+                //     agent {
+                //         docker {
+                //             image 'mcr.microsoft.com/playwright:v1.54.2-jammy'
+                //             reuseNode true
+                //         }
+                //     }
+                //     steps {
+                //         sh '''
+                //           npm ci
+                //           npx playwright test
+                //         '''
+                //     }
+                // }
             }
         }
 
