@@ -66,10 +66,16 @@ pipeline {
                 }
             }
             environment{
-                E2E_BASE_URL ='https://spanish-cards.netlify.app/'
+                E2E_BASE_URL ='https://valentinos-magic-beans.click/'
             }
             steps{
                 sh 'npx playwright test'
+            }
+            post{
+                always{
+                    publishHTML([allowMissing:false,alwaysLinkToLastBuild:true,icon:'',KeepAll:false,reportDir:'reports-e2e/html',reportFile:'index.html',reportName:'Playwright HTML Report',reportTitles:'',useWrapperFileDirectory:true])
+                    junit stdioRentention:'All', testResults:'reports-e2e/junit.xml'
+                }
             }
         }
     }
