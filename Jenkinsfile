@@ -32,6 +32,18 @@ pipeline {
                         sh 'npx vitest run --reporter=verbose'
                     }
                 }
+                stage('integration test'){
+                    agent{
+                        docker{
+                            image 'mcr.microsoft.com/playwright:v1.54.2_jimmy'
+                            reuseNode true
+
+                        }
+                   } 
+                   steps{
+                       sh 'npx playwright test'
+                   }
+                }
             }
         }
 
