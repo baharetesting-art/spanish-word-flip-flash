@@ -112,9 +112,9 @@ pipeline {
                         allowMissing: true
                     ])
                     // 2) Publish JUnit (works as-is)
-                     junit 'reports-e2e/junit.xml'
+                    junit testResults: 'reports-e2e/junit.xml'
                     // 3) Archive the full report so you can download & open it locally
-                     testResults:'reports-e2e/junit.xml'
+                    archiveArtifacts artifacts: 'reports-e2e/**', fingerprint: true
 
             
                 }
