@@ -103,20 +103,22 @@ pipeline {
             post {
                 always {
                     // Publish HTML report
+                    
                     publishHTML([
-                        reportDir: 'reports-e2e/html',
+                        reportDir: 'reports-e2e/html/',
                         reportFiles: 'index.html',
                         reportName: 'Playwright HTML Report',
-                        keepAll: true,
+                        reportTitle:'',
+                        useWrapperFileDirectory:true
+                        keepAll: false,
                         alwaysLinkToLastBuild: true,
-                        allowMissing: true,
-                        sandbox: false   // works on newer plugin versions
+                        icon:'',
+                        allowMissing: false
                     ])
-                    // Publish JUnit results
-                    junit 'reports-e2e/junit.xml'
+                     junit stdioRentention:'ALL',
+                     testResults:'reports-e2e/junit.xml'
 
-                    // Archive artifacts for download
-                    archiveArtifacts artifacts: 'reports-e2e/**', fingerprint: true
+            
                 }
             }
         }
