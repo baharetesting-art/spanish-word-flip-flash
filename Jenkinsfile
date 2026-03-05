@@ -110,9 +110,8 @@ pipeline {
                         keepAll: true,
                         alwaysLinkToLastBuild: true,
                         allowMissing: true,
-                        sandbox: false          // ✔️ IMPORTANT
-                        ])
-
+                        sandbox: false   // works on newer plugin versions
+                    ])
                     // Publish JUnit results
                     junit 'reports-e2e/junit.xml'
 
